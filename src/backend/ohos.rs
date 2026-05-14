@@ -22,6 +22,7 @@ use ohos_audio_sys::{
     OH_AudioStream_LatencyMode_AUDIOSTREAM_LATENCY_MODE_FAST,
     OH_AudioStream_SampleFormat_AUDIOSTREAM_SAMPLE_F32LE,
     OH_AudioStream_Type_AUDIOSTREAM_TYPE_RENDERER, OH_AudioStream_Usage_AUDIOSTREAM_USAGE_GAME,
+    OH_AudioRenderer_SetEffectMode,OH_AudioStream_AudioEffectMode_EFFECT_NONE,
 };
 use parking_lot::Mutex;
 
@@ -120,6 +121,13 @@ impl Backend for OhosBackend {
             let mut renderer: *mut OH_AudioRenderer = ptr::null_mut();
             OH_AudioStreamBuilder_GenerateRenderer(builder, &mut renderer);
             OH_AudioStreamBuilder_Destroy(builder);
+
+            // Set Effect to NONE,Likes Qualcomm's HAL ULL Audio Route.
+            OH_AudioRenderer_SetEffectMode(
+                renderer,
+                OH_AudioStream_AudioEffectMode_EFFECT_NONE,
+            );
+            
             let mut actual_sample_rate: i32 = 0;
             OH_AudioRenderer_GetSamplingRate(renderer, &mut actual_sample_rate);
             self.state.as_ref().unwrap().lock().mixer.sample_rate = actual_sample_rate as u32;
